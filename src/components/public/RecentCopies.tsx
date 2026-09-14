@@ -6,6 +6,7 @@ import { copyInformation } from "@/lib/copyItem";
 import { clearRecentCopies } from "@/lib/recent";
 import { cn } from "@/lib/utils";
 import type { InformationItem } from "@/types";
+import HScroller from "./HScroller";
 
 interface RecentCopiesProps {
   items: InformationItem[];
@@ -48,7 +49,7 @@ export default function RecentCopies({ items }: RecentCopiesProps) {
           <X size={12} /> Цэвэрлэх
         </button>
       </div>
-      <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+      <HScroller className="gap-2">
         {items.map((item) => {
           const copied = copiedId === item.id;
           return (
@@ -73,7 +74,7 @@ export default function RecentCopies({ items }: RecentCopiesProps) {
             </button>
           );
         })}
-      </div>
+      </HScroller>
     </section>
   );
 }

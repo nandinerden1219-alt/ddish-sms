@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { copyInformation } from "@/lib/copyItem";
 import { cn } from "@/lib/utils";
 import type { Category, InformationItem } from "@/types";
+import HScroller from "./HScroller";
 
 interface PopularSliderProps {
   items: InformationItem[];
@@ -41,7 +42,7 @@ export default function PopularSlider({ items, categoriesById }: PopularSliderPr
         </span>
         <span className="text-[12px] text-neutral-500">дарахад шууд хуулагдана</span>
       </div>
-      <div className="no-scrollbar flex gap-2.5 overflow-x-auto pb-1">
+      <HScroller>
         {items.map((item) => {
           const category = item.category_id ? categoriesById[item.category_id] : undefined;
           const copied = copiedId === item.id;
@@ -75,7 +76,7 @@ export default function PopularSlider({ items, categoriesById }: PopularSliderPr
             </button>
           );
         })}
-      </div>
+      </HScroller>
     </section>
   );
 }

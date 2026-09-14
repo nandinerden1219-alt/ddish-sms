@@ -1,7 +1,8 @@
 "use client";
 
-import { CornerDownLeft } from "lucide-react";
+import { ChevronRight, CornerDownLeft, LayoutGrid } from "lucide-react";
 import { useMemo, useState } from "react";
+import { getCategoryIcon } from "@/lib/categoryIcons";
 import { copyInformation } from "@/lib/copyItem";
 import { useRecentCopies } from "@/lib/recent";
 import { searchItems } from "@/lib/search";
@@ -16,6 +17,9 @@ import InformationCard from "./InformationCard";
 import LinksBoard from "./LinksBoard";
 import PopularSlider from "./PopularSlider";
 import RecentCopies from "./RecentCopies";
+
+/** Cards shown per category on the "all" overview before "Бүгдийг харах". */
+const OVERVIEW_LIMIT = 6;
 
 interface HomeClientProps {
   initialGroups: CategoryGroup[];
@@ -118,6 +122,19 @@ export default function HomeClient({
       .filter((s) => s.items.length > 0);
   }, [searching, view, initialCategories, displayedItems]);
 
+  // "All" is an overview: group → category → first few cards, mirroring the sidebar.
+  const overviewSections = useMemo(() => {
+    if (searching || view.kind !== "all") return null;
+    return tree
+      .map(({ group, categories }) => ({
+        group,
+        categories: categories
+          .map((cat) => ({ category: cat, items: displayedItems.filter((i) => i.category_id === cat.id) }))
+          .filter((s) => s.items.length > 0),
+      }))
+      .filter((g) => g.categories.length > 0);
+  }, [searching, view, tree, displayedItems]);
+
   const enterTargetId = searching ? displayedItems[0]?.id : undefined;
 
   function handleSearchSubmit() {
@@ -139,7 +156,8 @@ export default function HomeClient({
   })();
 
   const isItemsView = searching || view.kind === "all" || view.kind === "group" || view.kind === "category";
-  const showBoardStrip = !searching && view.kind !== "posts" && view.kind !== "links";
+  // Admin posts only on the home overview (and the dedicated Пост page).
+  const showBoardStrip = !searching && view.kind === "all";
   const showQuickRows = !searching && view.kind === "all";
 
   return (
@@ -229,32 +247,54 @@ export default function HomeClient({
                   message="Мэдээлэл олдсонгүй"
                   hint="Өөр үгээр хайж үзнэ үү (кирилл эсвэл латинаар), эсвэл ангиллаас сонгоно уу."
                 />
+              ) : overviewSections ? (
+                <div className="space-y-10">
+                  {overviewSections.map(({ group, categories: cats }) => {
+                    const GroupIcon = group ? getCategoryIcon(group.icon) : LayoutGrid;
+                    const total = cats.reduce((n, c) => n + c.items.length, 0);
+                    return (
+                      <section key={group?.id ?? "__ungrouped"}>
+                        <button
+                          type="button"
+                          onClick={() => group && setView({ kind: "group", id: group.id })}
+                          disabled={!group}
+                          className="mb-4 flex w-full items-center gap-2.5 border-b border-neutral-300 pb-2.5 text-left disabled:cursor-default"
+                          title={group ? "Энэ бүлгийг бүтнээр харах" : undefined}
+                        >
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-200 text-accent-900">
+                            <GroupIcon size={15} />
+                          </span>
+                          <h3 className="text-[17px]">{group?.name ?? "Бусад ангилал"}</h3>
+                          <span className="text-[12.5px] text-neutral-500">{total}</span>
+                          {group && <ChevronRight size={16} className="ml-auto text-neutral-500" />}
+                        </button>
+
+                        <div className="space-y-7">
+                          {cats.map(({ category, items }) => (
+                            <CategoryBlock
+                              key={category.id}
+                              category={category}
+                              items={items}
+                              limit={OVERVIEW_LIMIT}
+                              copyCounts={copyCounts}
+                              onOpen={() => setView({ kind: "category", id: category.id })}
+                            />
+                          ))}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
               ) : groupSections ? (
                 <div className="space-y-8">
                   {groupSections.map(({ category, items }) => (
-                    <section key={category.id}>
-                      <button
-                        type="button"
-                        onClick={() => setView({ kind: "category", id: category.id })}
-                        className="mb-3 inline-flex items-center gap-2 rounded-full py-1 pr-3 text-left hover:bg-neutral-200/70"
-                        title="Зөвхөн энэ ангиллыг харах"
-                      >
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: category.color }} />
-                        <h3 className="text-[16px]">{category.name}</h3>
-                        <span className="text-[12.5px] text-neutral-500">{items.length}</span>
-                      </button>
-                      <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 2xl:grid-cols-3">
-                        {items.map((item) => (
-                          <InformationCard
-                            key={item.id}
-                            item={item}
-                            category={category}
-                            initialCopyCount={copyCounts[item.id] ?? 0}
-                            hideCategory
-                          />
-                        ))}
-                      </div>
-                    </section>
+                    <CategoryBlock
+                      key={category.id}
+                      category={category}
+                      items={items}
+                      copyCounts={copyCounts}
+                      onOpen={() => setView({ kind: "category", id: category.id })}
+                    />
                   ))}
                 </div>
               ) : (
@@ -281,6 +321,60 @@ export default function HomeClient({
         Мэдээллийн сан · DDISH дотоод лавлах · {new Date().getFullYear()}
       </footer>
     </div>
+  );
+}
+
+/** A category heading + its cards; optionally only the first `limit` with a link to the rest. */
+function CategoryBlock({
+  category,
+  items,
+  limit,
+  copyCounts,
+  onOpen,
+}: {
+  category: Category;
+  items: InformationItem[];
+  limit?: number;
+  copyCounts: Record<string, number>;
+  onOpen: () => void;
+}) {
+  const shown = limit ? items.slice(0, limit) : items;
+  const rest = items.length - shown.length;
+  return (
+    <section>
+      <div className="mb-2.5 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onOpen}
+          className="inline-flex items-center gap-2 rounded-full py-1 pr-3 text-left hover:bg-neutral-200/70"
+          title="Зөвхөн энэ ангиллыг харах"
+        >
+          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: category.color }} />
+          <h4 className="text-[15px]">{category.name}</h4>
+          <span className="text-[12px] text-neutral-500">{items.length}</span>
+        </button>
+        {rest > 0 && (
+          <button
+            type="button"
+            onClick={onOpen}
+            className="ml-auto rounded-full px-2.5 py-1 text-[12px] font-semibold text-accent-700 hover:bg-accent-100"
+          >
+            Бүгдийг харах (+{rest}) →
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 2xl:grid-cols-3">
+        {shown.map((item) => (
+          <InformationCard
+            key={item.id}
+            item={item}
+            category={category}
+            initialCopyCount={copyCounts[item.id] ?? 0}
+            hideCategory
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
