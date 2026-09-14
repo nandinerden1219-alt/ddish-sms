@@ -1,5 +1,6 @@
 import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 import SearchBar from "./SearchBar";
 
 interface HeaderProps {
@@ -28,13 +29,16 @@ export default function Header({ query, onQueryChange, onSearchSubmit }: HeaderP
           <SearchBar value={query} onChange={onQueryChange} onSubmit={onSearchSubmit} />
         </div>
 
-        <Link
-          href="/admin"
-          className="flex shrink-0 items-center gap-2 rounded-full border border-neutral-300 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-neutral-200"
-        >
-          <ShieldCheck size={16} />
-          <span className="hidden sm:inline">Админ нэвтрэх</span>
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
+          <Link
+            href="/admin"
+            className="flex h-10 items-center gap-2 rounded-full border border-neutral-300 px-3.5 text-sm font-medium text-foreground transition-colors hover:bg-neutral-200 sm:px-4"
+          >
+            <ShieldCheck size={16} />
+            <span className="hidden sm:inline">Админ</span>
+          </Link>
+        </div>
       </div>
     </header>
   );

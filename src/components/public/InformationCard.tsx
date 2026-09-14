@@ -91,7 +91,7 @@ export default function InformationCard({
       ref={cardRef}
       className={cn(
         "flex h-full animate-fade-in flex-col rounded-md border border-neutral-300 bg-surface p-4 shadow-sm transition-shadow hover:shadow-md",
-        isEnterTarget && "ring-2 ring-accent-300"
+        isEnterTarget && "ring-2 ring-accent-400"
       )}
       style={{ borderLeft: `4px solid ${tint}` }}
     >

@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +64,7 @@ export default function AdminSidebar({ email }: { email: string }) {
 
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-neutral-900/42 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setOpen(false)}
         />
       )}
@@ -115,6 +116,7 @@ export default function AdminSidebar({ email }: { email: string }) {
         </nav>
 
         <div className="space-y-0.75 border-t border-neutral-300 p-3">
+          <ThemeToggle withLabel className="w-full justify-start border-transparent" />
           <Link
             href="/"
             className="block rounded-full px-3.5 py-2.25 text-sm text-muted hover:bg-neutral-200 hover:text-foreground"

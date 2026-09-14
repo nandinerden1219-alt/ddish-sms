@@ -57,6 +57,68 @@
   --font-heading: var(--font-unbounded), system-ui, sans-serif;
 }
 
+/* ---------------------------------------------------------------------------
+   Dark theme. Utilities reference the theme variables at runtime, so
+   overriding them under [data-theme="dark"] re-skins every component.
+   The neutral / accent ramps are inverted so "light tint background +
+   dark text" pairs become "dark tint + light text" automatically.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #1c1916;
+  --color-well: #2e2926;
+  --color-text: #f0e8dc;
+  --color-divider: color-mix(in srgb, #f0e8dc 14%, transparent);
+
+  --color-background: #1c1916;
+  --color-foreground: #f0e8dc;
+  --color-surface: #262220;
+  --color-muted: #a39a8c;
+  --color-border: #3d3733;
+
+  --color-neutral-50: #1f1c19;
+  --color-neutral-100: #262220;
+  --color-neutral-200: #302b27;
+  --color-neutral-300: #3d3733;
+  --color-neutral-400: #514a44;
+  --color-neutral-500: #7a7064;
+  --color-neutral-600: #a39a8c;
+  --color-neutral-700: #c4bbad;
+  --color-neutral-800: #ddd4c7;
+  --color-neutral-900: #f0e8dc;
+
+  --color-accent: #d47c44;
+  --color-accent-100: #2f2118;
+  --color-accent-200: #3f2b1d;
+  --color-accent-300: #5a3a24;
+  --color-accent-400: #8a5630;
+  --color-accent-500: #c67139;
+  --color-accent-600: #e0915b;
+  --color-accent-700: #eba876;
+  --color-accent-800: #f3c39c;
+  --color-accent-900: #fbe0c9;
+
+  --color-accent-2: #8fa073;
+  --color-accent-2-100: #1f2419;
+  --color-accent-2-200: #2a3122;
+  --color-accent-2-300: #3a4530;
+  --color-accent-2-400: #55643f;
+  --color-accent-2-500: #7a8a5e;
+  --color-accent-2-600: #8fa073;
+  --color-accent-2-700: #aebf92;
+  --color-accent-2-800: #ccdbb2;
+  --color-accent-2-900: #e1eecc;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 3px 10px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+
 * {
   text-wrap: pretty;
 }
@@ -78,6 +140,7 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
   font-family: var(--font-sans);
 }
 
