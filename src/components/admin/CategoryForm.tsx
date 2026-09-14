@@ -6,33 +6,38 @@ import { toast } from "sonner";
 import { CATEGORY_COLOR_PRESETS, CATEGORY_ICON_NAMES, CATEGORY_ICONS } from "@/lib/categoryIcons";
 import { createClient } from "@/lib/supabase/client";
 import { cn, slugify } from "@/lib/utils";
-import type { Category, CategoryFormValues } from "@/types";
+import type { Category, CategoryFormValues, CategoryGroup } from "@/types";
 import Modal from "./Modal";
 
 interface CategoryFormProps {
   onClose: () => void;
   onSaved: () => void;
   editingCategory: Category | null;
+  groups: CategoryGroup[];
+  /** Pre-select this group when creating a new category. */
+  defaultGroupId?: string;
 }
 
-function emptyValues(): CategoryFormValues {
+function emptyValues(defaultGroupId: string): CategoryFormValues {
   return {
     name: "",
     slug: "",
     color: CATEGORY_COLOR_PRESETS[0],
     icon: CATEGORY_ICON_NAMES[0],
+    group_id: defaultGroupId,
     display_order: 0,
     is_active: true,
   };
 }
 
-function initialValues(editingCategory: Category | null): CategoryFormValues {
-  if (!editingCategory) return emptyValues();
+function initialValues(editingCategory: Category | null, defaultGroupId: string): CategoryFormValues {
+  if (!editingCategory) return emptyValues(defaultGroupId);
   return {
     name: editingCategory.name,
     slug: editingCategory.slug,
     color: editingCategory.color,
     icon: editingCategory.icon,
+    group_id: editingCategory.group_id ?? "",
     display_order: editingCategory.display_order,
     is_active: editingCategory.is_active,
   };
@@ -42,8 +47,12 @@ export default function CategoryForm({
   onClose,
   onSaved,
   editingCategory,
+  groups,
+  defaultGroupId = "",
 }: CategoryFormProps) {
-  const [values, setValues] = useState<CategoryFormValues>(() => initialValues(editingCategory));
+  const [values, setValues] = useState<CategoryFormValues>(() =>
+    initialValues(editingCategory, defaultGroupId)
+  );
   const [slugEdited, setSlugEdited] = useState(() => !!editingCategory);
   const [saving, setSaving] = useState(false);
 
@@ -65,6 +74,7 @@ export default function CategoryForm({
       slug: values.slug.trim(),
       color: values.color,
       icon: values.icon,
+      group_id: values.group_id || null,
       display_order: values.display_order,
       is_active: values.is_active,
     };
@@ -118,6 +128,27 @@ export default function CategoryForm({
             className="w-full rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent-200"
             placeholder="Сунгалттай холбоотой"
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+            Хажуугийн цэсний бүлэг
+          </label>
+          <select
+            value={values.group_id}
+            onChange={(e) => setValues((v) => ({ ...v, group_id: e.target.value }))}
+            className="w-full rounded-full border border-border bg-background px-3.5 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent-200"
+          >
+            <option value="">— Бүлэггүй (Бусад ангилал) —</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-neutral-500">
+            Энэ ангилал сонгосон бүлгийн дор салаалж харагдана.
+          </p>
         </div>
 
         <div>

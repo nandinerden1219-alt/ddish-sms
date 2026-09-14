@@ -50,6 +50,28 @@ export function formatRelativeTime(dateString: string): string {
   });
 }
 
+/** "2026.09.14" */
+export function formatDate(dateString: string): string {
+  const d = new Date(dateString);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
+}
+
+/** Local "YYYY-MM-DD" for <input type="date">; "" when null. */
+export function toDateInputValue(dateString: string | null): string {
+  if (!dateString) return "";
+  const d = new Date(dateString);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/** End of the given local day as ISO, or null for "". */
+export function endOfDayIso(dateInput: string): string | null {
+  if (!dateInput) return null;
+  const [y, m, d] = dateInput.split("-").map(Number);
+  return new Date(y, m - 1, d, 23, 59, 59).toISOString();
+}
+
 export function formatDateTime(dateString: string): string {
   return new Date(dateString).toLocaleString("mn-MN", {
     year: "numeric",

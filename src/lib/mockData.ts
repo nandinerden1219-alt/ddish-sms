@@ -1,19 +1,29 @@
-import type { Category, InformationItem } from "@/types";
+import type { Announcement, Category, CategoryGroup, InformationItem, UsefulLink } from "@/types";
 
 const now = new Date();
 const daysAgo = (d: number) => new Date(now.getTime() - d * 24 * 60 * 60 * 1000).toISOString();
 
+export const MOCK_GROUPS: CategoryGroup[] = [
+  { id: "grp-sungalt", name: "Сунгалт хийх заавар", slug: "sungalt-zaavar", icon: "RefreshCw", display_order: 1, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "grp-sms", name: "SMS заавар", slug: "sms-zaavar", icon: "MessageSquare", display_order: 2, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+];
+
+export const MOCK_LINKS: UsefulLink[] = [
+  { id: "link-1", title: "DDISH албан ёсны сайт", url: "https://ddishtv.mn", description: "Багц, үнэ, сувгийн жагсаалт, мэдээ", display_order: 1, is_active: true, created_at: daysAgo(30), updated_at: daysAgo(30) },
+  { id: "link-2", title: "Хаан банк — Интернэт банк", url: "https://e.khanbank.com", description: "Хэрэглэгчийн шилжүүлгийг шалгах", display_order: 2, is_active: true, created_at: daysAgo(30), updated_at: daysAgo(30) },
+];
+
 export const MOCK_CATEGORIES: Category[] = [
-  { id: "cat-sungalt", name: "Сунгалттай холбоотой", slug: "sungalt", color: "#f6a06b", icon: "RefreshCw", display_order: 1, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-dans", name: "Данс, цэнэглэлт", slug: "dans", color: "#aebf92", icon: "Wallet", display_order: 2, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-admin", name: "Админ дугаарын бүртгэл", slug: "admin", color: "#c0b6a5", icon: "UserCog", display_order: 3, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-kino", name: "Кино ба контент", slug: "kino", color: "#d67f48", icon: "Film", display_order: 4, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-kollektiv", name: "Коллектив үйлчилгээ", slug: "kollektiv", color: "#8fa073", icon: "Users", display_order: 5, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-upoint", name: "Upoint үйлчилгээ", slug: "upoint", color: "#ffc6a5", icon: "Star", display_order: 6, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-ger", name: "Гэр дүүрэн үйлчилгээ", slug: "ger", color: "#ccdbb2", icon: "Home", display_order: 7, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-zalruulga", name: "Алдаатай гүйлгээ залруулах", slug: "zalruulga", color: "#b2622d", icon: "RotateCcw", display_order: 8, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-noat", name: "НӨАТ бүртгэл", slug: "noat", color: "#a19786", icon: "Receipt", display_order: 9, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
-  { id: "cat-busad", name: "Идэвхжүүлэлт ба бусад", slug: "busad", color: "#dcd3c4", icon: "CircleEllipsis", display_order: 10, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-sungalt", name: "Сунгалттай холбоотой", slug: "sungalt", color: "#f6a06b", icon: "RefreshCw", group_id: "grp-sungalt", display_order: 1, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-dans", name: "Данс, цэнэглэлт", slug: "dans", color: "#aebf92", icon: "Wallet", group_id: "grp-sungalt", display_order: 2, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-admin", name: "Админ дугаарын бүртгэл", slug: "admin", color: "#c0b6a5", icon: "UserCog", group_id: "grp-sms", display_order: 3, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-kino", name: "Кино ба контент", slug: "kino", color: "#d67f48", icon: "Film", group_id: "grp-sms", display_order: 4, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-kollektiv", name: "Коллектив үйлчилгээ", slug: "kollektiv", color: "#8fa073", icon: "Users", group_id: "grp-sms", display_order: 5, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-upoint", name: "Upoint үйлчилгээ", slug: "upoint", color: "#ffc6a5", icon: "Star", group_id: "grp-sms", display_order: 6, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-ger", name: "Гэр дүүрэн үйлчилгээ", slug: "ger", color: "#ccdbb2", icon: "Home", group_id: "grp-sungalt", display_order: 7, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-zalruulga", name: "Алдаатай гүйлгээ залруулах", slug: "zalruulga", color: "#b2622d", icon: "RotateCcw", group_id: "grp-sungalt", display_order: 8, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-noat", name: "НӨАТ бүртгэл", slug: "noat", color: "#a19786", icon: "Receipt", group_id: "grp-sms", display_order: 9, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
+  { id: "cat-busad", name: "Идэвхжүүлэлт ба бусад", slug: "busad", color: "#dcd3c4", icon: "CircleEllipsis", group_id: "grp-sms", display_order: 10, is_active: true, created_at: daysAgo(120), updated_at: daysAgo(120) },
 ];
 
 export const MOCK_ITEMS: InformationItem[] = [
@@ -874,5 +884,30 @@ export const MOCK_ITEMS: InformationItem[] = [
     is_active: true,
     created_at: daysAgo(24),
     updated_at: daysAgo(1),
+  },
+];
+
+export const MOCK_ANNOUNCEMENTS: Announcement[] = [
+  {
+    id: "ann-1",
+    title: "Мэдээллийн сан ажиллаж эхэллээ",
+    body: "Excel файлын оронд энэ сайтаас мэдээллээ хайж, «Хуулах» товч эсвэл мессежийн хайрцаг дээр дараад шууд хуулна.\nСанал, засвар байвал админд мэдэгдээрэй.",
+    level: "info",
+    is_pinned: true,
+    is_active: true,
+    expires_at: null,
+    created_at: daysAgo(1),
+    updated_at: daysAgo(1),
+  },
+  {
+    id: "ann-2",
+    title: "Хаан банкны шилжүүлэг 15 минут хүртэл саатаж болзошгүй",
+    body: "Өнөөдөр 14:00–16:00 цагийн хооронд банкны системийн шинэчлэлтээс болж сунгалт хоцорч идэвхжиж болно. Хэрэглэгчдэд дараах хариуг өгнө үү:\n\nTanii sungalt 15 minutiin dotor idevhjine. Tuur huleej baigaad shalgana uu.\nDDISH",
+    level: "warning",
+    is_pinned: false,
+    is_active: true,
+    expires_at: null,
+    created_at: daysAgo(0),
+    updated_at: daysAgo(0),
   },
 ];

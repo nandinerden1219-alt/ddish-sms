@@ -75,7 +75,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="mt-2 flex min-h-11.5 w-full items-center justify-center gap-2 rounded-full bg-accent font-heading text-[15px] text-background transition-colors hover:bg-accent-600 disabled:opacity-60"
+        className="mt-2 flex min-h-11.5 w-full items-center justify-center gap-2 rounded-full bg-accent text-[15px] font-semibold text-background transition-colors hover:bg-accent-600 disabled:opacity-60"
       >
         {loading && <Loader2 size={16} className="animate-spin" />}
         Нэвтрэх

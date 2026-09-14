@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { copyInformation } from "@/lib/copyItem";
 import { cn } from "@/lib/utils";
@@ -33,12 +33,15 @@ export default function PopularSlider({ items, categoriesById }: PopularSliderPr
   }
 
   return (
-    <section className="mb-7.5">
-      <div className="mb-3 flex items-baseline gap-3">
-        <h2 className="text-[22px]">Түгээмэл мэдээлэл</h2>
-        <span className="text-[13px] text-neutral-600">Дарахад шууд хуулагдана</span>
+    <section className="mb-7">
+      <div className="mb-2 flex items-center gap-2">
+        <Zap size={14} className="text-accent-700" />
+        <span className="text-[11px] font-semibold tracking-widest text-neutral-500 uppercase">
+          Түгээмэл
+        </span>
+        <span className="text-[12px] text-neutral-500">дарахад шууд хуулагдана</span>
       </div>
-      <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1.5">
+      <div className="no-scrollbar flex gap-2.5 overflow-x-auto pb-1">
         {items.map((item) => {
           const category = item.category_id ? categoriesById[item.category_id] : undefined;
           const copied = copiedId === item.id;
@@ -48,25 +51,25 @@ export default function PopularSlider({ items, categoriesById }: PopularSliderPr
               type="button"
               onClick={() => handleCopy(item)}
               className={cn(
-                "flex w-65.5 shrink-0 flex-col gap-2.25 rounded-md border p-4 text-left shadow-sm transition-all hover:shadow-md active:scale-[0.98]",
+                "flex w-60 shrink-0 flex-col gap-1.5 rounded-md border p-3.5 text-left transition-all active:scale-[0.98]",
                 copied
                   ? "border-accent-2-500 bg-accent-2-100"
-                  : "border-accent-200 bg-accent-100 hover:border-accent-400"
+                  : "border-accent-200 bg-accent-100 hover:border-accent-400 hover:shadow-sm"
               )}
             >
-              <span className="text-[11px] font-semibold tracking-[0.08em] text-accent-700 uppercase">
+              <span className="truncate text-[10.5px] font-semibold tracking-[0.06em] text-accent-700 uppercase">
                 {category?.name ?? "Мэдээлэл"}
               </span>
-              <span className="font-heading text-[15.5px] leading-tight text-accent-900">
+              <span className="line-clamp-2 text-[14px] leading-snug font-semibold text-accent-900">
                 {item.title}
               </span>
               <span
                 className={cn(
-                  "inline-flex items-center gap-1.5 text-[12.5px] font-semibold",
+                  "mt-auto inline-flex items-center gap-1.5 pt-1 text-[12px] font-semibold",
                   copied ? "text-accent-2-800" : "text-accent-700"
                 )}
               >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? <Check size={13} /> : <Copy size={13} />}
                 {copied ? "Хуулсан" : "Хуулах"}
               </span>
             </button>

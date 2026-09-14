@@ -61,6 +61,19 @@
   text-wrap: pretty;
 }
 
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);
@@ -68,13 +81,20 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Display face only for page/section titles; everything else stays in the
+   quieter body face so cards and buttons read as one calm system. */
 h1,
-h2,
-h3,
-h4 {
+h2 {
   font-family: var(--font-heading);
   font-weight: 500;
   letter-spacing: -0.015em;
+}
+
+h3,
+h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
 ::-webkit-scrollbar {

@@ -13,6 +13,7 @@ export default async function AdminDashboardPage() {
     { count: totalPopular },
     { data: allItems },
     { data: popularityRows },
+    { count: activeAnnouncements },
   ] = await Promise.all([
     supabase.from("information_items").select("*", { count: "exact", head: true }),
     supabase.from("categories").select("*", { count: "exact", head: true }),
@@ -22,6 +23,11 @@ export default async function AdminDashboardPage() {
       .eq("is_popular", true),
     supabase.from("information_items").select("id, title, updated_at"),
     supabase.from("information_popularity").select("*"),
+    supabase
+      .from("announcements")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true)
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`),
   ]);
 
   const todayCount = (allItems ?? []).filter((item) => isUpdatedToday(item.updated_at)).length;
@@ -49,6 +55,7 @@ export default async function AdminDashboardPage() {
         totalCategories={totalCategories ?? 0}
         totalPopular={totalPopular ?? 0}
         todayUpdated={todayCount}
+        activeAnnouncements={activeAnnouncements ?? 0}
       />
 
       <div className="mt-8 rounded-md border border-neutral-300 bg-surface p-5">

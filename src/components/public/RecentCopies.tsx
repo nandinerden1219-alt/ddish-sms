@@ -36,8 +36,8 @@ export default function RecentCopies({ items }: RecentCopiesProps) {
   return (
     <section className="mb-5">
       <div className="mb-2 flex items-center gap-2">
-        <History size={14} className="text-neutral-600" />
-        <span className="text-[11.5px] font-semibold tracking-[0.09em] text-neutral-600 uppercase">
+        <History size={14} className="text-neutral-500" />
+        <span className="text-[11px] font-semibold tracking-widest text-neutral-500 uppercase">
           Сүүлд хуулсан
         </span>
         <button
