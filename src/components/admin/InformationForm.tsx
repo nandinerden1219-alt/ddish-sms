@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -11,6 +12,8 @@ interface InformationFormProps {
   onSaved: () => void;
   categories: Category[];
   editingItem: InformationItem | null;
+  /** When editing: asks the parent to delete this item (parent confirms). */
+  onDelete?: () => void;
 }
 
 function emptyValues(defaultCategoryId: string): InformationFormValues {
@@ -48,6 +51,7 @@ export default function InformationForm({
   onSaved,
   categories,
   editingItem,
+  onDelete,
 }: InformationFormProps) {
   const [values, setValues] = useState<InformationFormValues>(() =>
     initialValues(editingItem, categories)
@@ -201,7 +205,16 @@ export default function InformationForm({
           </label>
         </div>
 
-        <div className="flex justify-end gap-2.5 border-t border-border pt-4">
+        <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-border pt-4">
+          {editingItem && onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="mr-auto inline-flex min-h-11 items-center gap-1.5 rounded-full border border-accent-300 px-4 py-2.5 text-sm font-semibold text-accent-800 hover:bg-accent-200"
+            >
+              <Trash2 size={15} /> Устгах
+            </button>
+          )}
           <button
             type="button"
             onClick={onClose}

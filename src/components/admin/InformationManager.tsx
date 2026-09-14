@@ -79,6 +79,33 @@ export default function InformationManager({
     refetch();
   }
 
+  async function patchItem(item: InformationItem, changes: Partial<InformationItem>, successMsg: string) {
+    const supabase = createClient();
+    const { error } = await supabase.from("information_items").update(changes).eq("id", item.id);
+    if (error) {
+      toast.error("Шинэчлэхэд алдаа гарлаа");
+      return;
+    }
+    toast.success(successMsg);
+    refetch();
+  }
+
+  function handleToggleActive(item: InformationItem) {
+    void patchItem(
+      item,
+      { is_active: !item.is_active },
+      item.is_active ? "Нүүр хуудаснаас нуулаа" : "Нүүр хуудсанд гаргалаа"
+    );
+  }
+
+  function handleTogglePopular(item: InformationItem) {
+    void patchItem(
+      item,
+      { is_popular: !item.is_popular },
+      item.is_popular ? "Түгээмэлээс хаслаа" : "Түгээмэл болголоо"
+    );
+  }
+
   async function handleConfirmDelete() {
     if (!deleteTarget) return;
     const supabase = createClient();
@@ -99,8 +126,10 @@ export default function InformationManager({
     <div>
       <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-xl font-semibold">Мэдээллүүд</h1>
-          <p className="mt-0.5 text-sm text-muted">Нийт {items.length} мэдээлэл</p>
+          <h1 className="text-xl">Мэдээллүүд</h1>
+          <p className="mt-0.5 text-sm text-muted">
+            Нийт {items.length} мэдээлэл · мөр бүр дээр Түгээмэл / Нийтэд товчоор шууд солино
+          </p>
         </div>
         <button
           type="button"
@@ -141,6 +170,8 @@ export default function InformationManager({
         onEdit={handleEdit}
         onDelete={setDeleteTarget}
         onDuplicate={handleDuplicate}
+        onToggleActive={handleToggleActive}
+        onTogglePopular={handleTogglePopular}
       />
 
       {formOpen && (
@@ -149,6 +180,14 @@ export default function InformationManager({
           onSaved={refetch}
           categories={categories}
           editingItem={editingItem}
+          onDelete={
+            editingItem
+              ? () => {
+                  setFormOpen(false);
+                  setDeleteTarget(editingItem);
+                }
+              : undefined
+          }
         />
       )}
 
