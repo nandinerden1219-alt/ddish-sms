@@ -59,11 +59,21 @@ export interface InformationItem {
   message: string;
   additional_info: string | null;
   keywords: string | null;
+  /** Step images in display order. Missing on databases that haven't run
+   *  the images migration. */
+  images?: InformationImage[];
   display_order: number;
   is_popular: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface InformationImage {
+  /** Object path in the information-images bucket. */
+  path: string;
+  /** Caption shown in the enlarged view; may be "". */
+  name: string;
 }
 
 export interface InformationWithStats extends InformationItem {
@@ -88,6 +98,7 @@ export interface InformationFormValues {
   message: string;
   additional_info: string;
   keywords: string;
+  images: InformationImage[];
   display_order: number;
   is_popular: boolean;
   is_active: boolean;

@@ -2,12 +2,14 @@
 
 import { ChevronDown, CornerDownLeft, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import StorageImage from "@/components/StorageImage";
 import { copyInformation, type CopyKind } from "@/lib/copyItem";
 import { logUsage } from "@/lib/usage";
 import { cn, isNew } from "@/lib/utils";
 import type { Category, InformationItem } from "@/types";
 import CopyButton from "./CopyButton";
 import Highlight from "./Highlight";
+import ImageLightbox from "./ImageLightbox";
 
 interface InformationCardProps {
   item: InformationItem;
@@ -30,12 +32,14 @@ export default function InformationCard({
   const [open, setOpen] = useState(false);
   const [copyCount, setCopyCount] = useState(initialCopyCount);
   const [flash, setFlash] = useState<CopyKind | null>(null);
+  const [viewingImage, setViewingImage] = useState<number | null>(null);
 
   const cardRef = useRef<HTMLElement>(null);
   const hasLoggedView = useRef(false);
   const flashTimer = useRef<number | null>(null);
 
   const hasAdditional = !!item.additional_info?.trim();
+  const images = item.images ?? [];
   const showNewBadge = isNew(item.created_at);
   const tint = category?.color ?? "#a19786";
 
@@ -144,6 +148,35 @@ export default function InformationCard({
           <Copy size={11} /> Дарж хуулах
         </span>
       </div>
+
+      {images.length > 0 && (
+        <div className="mb-3 grid grid-cols-4 gap-1.5">
+          {images.map((img, i) => (
+            <button
+              key={img.path}
+              type="button"
+              onClick={() => setViewingImage(i)}
+              title={img.name || undefined}
+              aria-label={`${i + 1}-р зургийг томруулах${img.name ? `: ${img.name}` : ""}`}
+              className="relative aspect-square overflow-hidden rounded-sm border border-neutral-200 bg-background transition-colors hover:border-accent-300"
+            >
+              <StorageImage path={img.path} loading="lazy" className="h-full w-full object-cover" />
+              <span className="absolute top-1 left-1 rounded-full bg-black/65 px-1.5 py-px text-[10.5px] font-semibold text-white">
+                {i + 1}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {viewingImage !== null && (
+        <ImageLightbox
+          images={images}
+          index={viewingImage}
+          onIndexChange={setViewingImage}
+          onClose={() => setViewingImage(null)}
+        />
+      )}
 
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <CopyButton onCopy={() => copy("main")} />

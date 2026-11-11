@@ -3,6 +3,7 @@
 import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { copyImages, deleteImages } from "@/lib/images";
 import { filterItemsBySearch } from "@/lib/search";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, InformationItem } from "@/types";
@@ -67,6 +68,7 @@ export default function InformationManager({
       message: item.message,
       additional_info: item.additional_info,
       keywords: item.keywords,
+      ...(item.images?.length ? { images: await copyImages(item.images) } : {}),
       display_order: item.display_order,
       is_popular: item.is_popular,
       is_active: item.is_active,
@@ -116,6 +118,7 @@ export default function InformationManager({
     if (error) {
       toast.error("Устгахад алдаа гарлаа");
     } else {
+      void deleteImages((deleteTarget.images ?? []).map((img) => img.path));
       toast.success("Устгагдлаа");
       refetch();
     }

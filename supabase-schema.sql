@@ -48,12 +48,19 @@ create table if not exists public.information_items (
   message text not null,
   additional_info text,
   keywords text,
+  -- Ordered step images: [{"path": "<object in information-images>", "name": "<caption>"}, …]
+  images jsonb not null default '[]'::jsonb check (jsonb_typeof(images) = 'array'),
   display_order integer not null default 0,
   is_popular boolean not null default false,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Databases created before card images existed:
+alter table public.information_items
+  add column if not exists images jsonb not null default '[]'::jsonb
+  check (jsonb_typeof(images) = 'array');
 
 create table if not exists public.information_usage (
   id uuid primary key default gen_random_uuid(),
@@ -356,6 +363,44 @@ create policy useful_links_delete_admin
 on public.useful_links for delete
 to authenticated
 using (true);
+
+-- Card images (Storage) -------------------------------------------
+-- Public bucket: anyone can view the files by URL, only admins can change them.
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'information-images',
+  'information-images',
+  true,
+  10485760, -- 10 MB
+  array['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+)
+on conflict (id) do nothing;
+
+drop policy if exists information_images_select_admin on storage.objects;
+create policy information_images_select_admin
+on storage.objects for select
+to authenticated
+using (bucket_id = 'information-images');
+
+drop policy if exists information_images_insert_admin on storage.objects;
+create policy information_images_insert_admin
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'information-images');
+
+drop policy if exists information_images_update_admin on storage.objects;
+create policy information_images_update_admin
+on storage.objects for update
+to authenticated
+using (bucket_id = 'information-images')
+with check (bucket_id = 'information-images');
+
+drop policy if exists information_images_delete_admin on storage.objects;
+create policy information_images_delete_admin
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'information-images');
 
 -- =========================================================
 -- 5. Seed data (only inserted if missing; edit/delete freely
