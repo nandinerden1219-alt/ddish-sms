@@ -9,16 +9,18 @@
   --color-background: #f5ead8;
   --color-foreground: #201e1d;
   --color-surface: #f9f4ed;
-  --color-muted: #82796a;
+  --color-muted: #6a6255;
   --color-border: #dcd3c4;
 
+  /* 500/600 are only used as text colours: both clear 4.5:1 on the page
+     background, since most of that text is 11–12px meta. */
   --color-neutral-50: #fdfaf5;
   --color-neutral-100: #f9f4ed;
   --color-neutral-200: #eee7db;
   --color-neutral-300: #dcd3c4;
   --color-neutral-400: #c0b6a5;
-  --color-neutral-500: #a19786;
-  --color-neutral-600: #82796a;
+  --color-neutral-500: #716859;
+  --color-neutral-600: #6a6255;
   --color-neutral-700: #645c50;
   --color-neutral-800: #474238;
   --color-neutral-900: #2e2b25;
@@ -86,7 +88,7 @@
   --color-neutral-200: #302b27;
   --color-neutral-300: #3d3733;
   --color-neutral-400: #514a44;
-  --color-neutral-500: #7a7064;
+  --color-neutral-500: #8f8576;
   --color-neutral-600: #a39a8c;
   --color-neutral-700: #c4bbad;
   --color-neutral-800: #ddd4c7;

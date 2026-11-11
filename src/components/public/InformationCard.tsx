@@ -10,6 +10,7 @@ import type { Category, InformationItem } from "@/types";
 import CopyButton from "./CopyButton";
 import Highlight from "./Highlight";
 import ImageLightbox from "./ImageLightbox";
+import Linkify from "./Linkify";
 
 interface InformationCardProps {
   item: InformationItem;
@@ -142,7 +143,7 @@ export default function InformationCard({
               : "border-neutral-200 hover:border-accent-300"
           )}
         >
-          {item.message}
+          <Linkify text={item.message} />
         </pre>
         <span className="pointer-events-none absolute top-2 right-2 hidden items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[11px] text-neutral-600 shadow-sm group-hover:inline-flex">
           <Copy size={11} /> Дарж хуулах
@@ -161,9 +162,11 @@ export default function InformationCard({
               className="relative aspect-square overflow-hidden rounded-sm border border-neutral-200 bg-background transition-colors hover:border-accent-300"
             >
               <StorageImage path={img.path} loading="lazy" className="h-full w-full object-cover" />
-              <span className="absolute top-1 left-1 rounded-full bg-black/65 px-1.5 py-px text-[10.5px] font-semibold text-white">
-                {i + 1}
-              </span>
+              {images.length > 1 && (
+                <span className="absolute top-1 left-1 rounded-full bg-black/65 px-1.5 py-px text-[10.5px] font-semibold text-white">
+                  {i + 1}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -210,7 +213,7 @@ export default function InformationCard({
                 : "border-accent-2-200 bg-accent-2-100 hover:border-accent-2-400"
             )}
           >
-            {item.additional_info}
+            <Linkify text={item.additional_info ?? ""} />
           </pre>
         </div>
       )}

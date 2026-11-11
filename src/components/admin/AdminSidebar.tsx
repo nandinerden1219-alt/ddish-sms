@@ -21,14 +21,14 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin", label: "Хянах самбар", icon: LayoutDashboard },
   { href: "/admin/information", label: "Мэдээллүүд", icon: FileText },
   { href: "/admin/announcements", label: "Мэдэгдэл", icon: Megaphone },
   { href: "/admin/categories", label: "Ангилал ба цэс", icon: Tags },
   { href: "/admin/links", label: "Хэрэгтэй линк", icon: Link2 },
   { href: "/admin/popular", label: "Түгээмэл мэдээлэл", icon: Star },
-  { href: "/admin/import", label: "Import Excel", icon: FileSpreadsheet },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/import", label: "Excel импорт", icon: FileSpreadsheet },
+  { href: "/admin/settings", label: "Тохиргоо", icon: Settings },
 ];
 
 export default function AdminSidebar({ email }: { email: string }) {

@@ -92,7 +92,7 @@ export default function CategorySidebar({
                 >
                   <GroupIcon size={16} className="shrink-0" />
                   <span className="flex-1 truncate">{group?.name ?? "Бусад ангилал"}</span>
-                  <span className="text-[12px] font-medium opacity-60">{groupCount}</span>
+                  <span className="text-[12px] font-medium opacity-80">{groupCount}</span>
                 </button>
                 <button
                   type="button"
@@ -128,7 +128,7 @@ export default function CategorySidebar({
                             style={{ backgroundColor: cat.color }}
                           />
                           <span className="flex-1 truncate">{cat.name}</span>
-                          <span className="text-[12px] opacity-55">{counts[cat.id] ?? 0}</span>
+                          <span className="text-[12px] opacity-80">{counts[cat.id] ?? 0}</span>
                         </button>
                       </li>
                     );
@@ -181,7 +181,7 @@ function TopButton({
     >
       <Icon size={16} className="shrink-0" />
       <span className="flex-1 truncate">{label}</span>
-      <span className="text-[12px] opacity-60">{count}</span>
+      <span className="text-[12px] opacity-80">{count}</span>
     </button>
   );
 }

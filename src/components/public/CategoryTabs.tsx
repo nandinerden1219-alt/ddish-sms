@@ -86,7 +86,7 @@ export default function CategoryTabs({
               >
                 <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: cat.color }} />
                 {cat.name}
-                <span className="opacity-55">{counts[cat.id] ?? 0}</span>
+                <span className="opacity-80">{counts[cat.id] ?? 0}</span>
               </button>
             );
           })}

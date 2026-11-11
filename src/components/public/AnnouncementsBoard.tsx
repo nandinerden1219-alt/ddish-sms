@@ -211,7 +211,6 @@ function AnnouncementCard({
             {expanded ? "Хумих" : "Дэлгэрэнгүй"}
           </button>
         )}
-        <span className="ml-auto text-[12px] text-neutral-600">{formatRelativeTime(a.created_at)}</span>
       </div>
     </article>
   );

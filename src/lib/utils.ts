@@ -43,12 +43,11 @@ export function formatRelativeTime(dateString: string): string {
   if (diffHour < 24) return `${diffHour} цагийн өмнө`;
   if (diffDay < 7) return `${diffDay} өдрийн өмнө`;
 
-  return date.toLocaleDateString("mn-MN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  return formatDate(dateString);
 }
+
+// Dates are formatted by hand, not with toLocale*("mn-MN"): browsers without
+// Mongolian locale data fall back to "09/14/2026", which also breaks hydration.
 
 /** "2026.09.14" */
 export function formatDate(dateString: string): string {
@@ -72,14 +71,11 @@ export function endOfDayIso(dateInput: string): string | null {
   return new Date(y, m - 1, d, 23, 59, 59).toISOString();
 }
 
+/** "2026.09.14 13:05" */
 export function formatDateTime(dateString: string): string {
-  return new Date(dateString).toLocaleString("mn-MN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(dateString);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${formatDate(dateString)} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 export function isUpdatedToday(dateString: string): boolean {
