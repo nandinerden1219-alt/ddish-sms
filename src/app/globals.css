@@ -208,3 +208,59 @@ h4 {
 .animate-fade-in {
   animation: fade-in 0.15s ease-out;
 }
+
+/* ---- Nandia AI mascot + chat widget ---- */
+@keyframes nandia-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes nandia-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes nandia-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.nandia-bob {
+  animation: nandia-bob 3s ease-in-out infinite;
+}
+
+.nandia-pop {
+  transform-origin: bottom right;
+  animation: nandia-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.nandia-dot {
+  animation: nandia-dot 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nandia-bob,
+  .nandia-pop,
+  .nandia-dot {
+    animation: none;
+  }
+}

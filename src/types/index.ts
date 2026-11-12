@@ -44,6 +44,24 @@ export interface UsefulLinkFormValues {
   is_active: boolean;
 }
 
+/** One section of the Nandia AI knowledge base (admin-managed). */
+export interface AssistantKnowledge {
+  id: string;
+  title: string;
+  content: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssistantKnowledgeFormValues {
+  title: string;
+  content: string;
+  display_order: number;
+  is_active: boolean;
+}
+
 export interface CategoryGroupFormValues {
   name: string;
   slug: string;

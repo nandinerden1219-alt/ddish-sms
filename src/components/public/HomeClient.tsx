@@ -11,10 +11,12 @@ import type { Announcement, Category, CategoryGroup, InformationItem, UsefulLink
 import AnnouncementsBoard from "./AnnouncementsBoard";
 import CategorySidebar, { type NavTree } from "./CategorySidebar";
 import CategoryTabs from "./CategoryTabs";
+import DiagnoseModal from "./DiagnoseModal";
 import EmptyState from "./EmptyState";
 import Header from "./Header";
 import InformationCard from "./InformationCard";
 import LinksBoard from "./LinksBoard";
+import NandiaChat from "./NandiaChat";
 import PopularSlider from "./PopularSlider";
 import RecentCopies from "./RecentCopies";
 
@@ -43,6 +45,7 @@ export default function HomeClient({
 }: HomeClientProps) {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<View>(ALL_VIEW);
+  const [diagnoseOpen, setDiagnoseOpen] = useState(false);
   const recentIds = useRecentCopies();
 
   const categoriesById = useMemo(() => {
@@ -162,7 +165,14 @@ export default function HomeClient({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header query={query} onQueryChange={setQuery} onSearchSubmit={handleSearchSubmit} />
+      <Header
+        query={query}
+        onQueryChange={setQuery}
+        onSearchSubmit={handleSearchSubmit}
+        onOpenDiagnose={() => setDiagnoseOpen(true)}
+      />
+      <DiagnoseModal open={diagnoseOpen} onClose={() => setDiagnoseOpen(false)} items={initialItems} />
+      <NandiaChat items={initialItems} />
       {notice && (
         <div className="bg-accent-100 px-4 py-2 text-center text-xs font-medium text-accent-800 sm:px-6">
           {notice}

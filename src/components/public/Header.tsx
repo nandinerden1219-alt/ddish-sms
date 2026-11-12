@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { SatelliteDish, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import SearchBar from "./SearchBar";
@@ -7,9 +7,10 @@ interface HeaderProps {
   query: string;
   onQueryChange: (value: string) => void;
   onSearchSubmit?: () => void;
+  onOpenDiagnose?: () => void;
 }
 
-export default function Header({ query, onQueryChange, onSearchSubmit }: HeaderProps) {
+export default function Header({ query, onQueryChange, onSearchSubmit, onOpenDiagnose }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-divider bg-background/92 backdrop-blur-md">
       <div className="mx-auto flex max-w-340 items-center gap-5 px-4 py-3.5 sm:px-6">
@@ -30,6 +31,17 @@ export default function Header({ query, onQueryChange, onSearchSubmit }: HeaderP
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {onOpenDiagnose && (
+            <button
+              type="button"
+              onClick={onOpenDiagnose}
+              title="Дохионы хувиар антен оношлох"
+              className="flex h-10 items-center gap-2 rounded-full bg-accent px-3.5 text-sm font-medium text-background transition-colors hover:bg-accent-600 sm:px-4"
+            >
+              <SatelliteDish size={16} />
+              <span className="hidden sm:inline">Оношилгоо</span>
+            </button>
+          )}
           <ThemeToggle />
           <Link
             href="/admin"
