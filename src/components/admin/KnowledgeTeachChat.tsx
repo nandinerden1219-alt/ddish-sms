@@ -27,15 +27,14 @@ interface Message {
 }
 
 const EXAMPLE =
-  "nagra der udirdlagiin nogoon tovch darahad dohionii tsonh garna, chanar 60 aas doosh bol anten taaraagui";
-
+  " zasah ymu nemeh ym baival hamaaagui bichere gol n bichhde sain anhaarad ilgegere hhe";
 /** Text the model sees for its own earlier turn, including what happened to each change. */
 function historyText(m: Message): string {
   if (!m.changes?.length) return m.text;
   const lines = m.changes.map((c) =>
     c.undone
       ? `[Админ буцаасан: "${c.title}"]`
-      : `[${c.type === "create" ? "Шинээр нэмсэн" : "Зассан"}: "${c.title}"]`
+      : `[${c.type === "create" ? "Шинээр нэмсэн" : "Зассан"}: "${c.title}"]`,
   );
   return [m.text, ...lines].join("\n");
 }
@@ -44,7 +43,11 @@ function historyText(m: Message): string {
  * "Nandia-д заах": admins tell the assistant new facts in plain chat; the
  * server files them into the knowledge base right away (with undo here).
  */
-export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => void }) {
+export default function KnowledgeTeachChat({
+  onChanged,
+}: {
+  onChanged: () => void;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -73,20 +76,37 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
       const res = await fetch("/api/admin/knowledge-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, text: historyText(m) })) }),
+        body: JSON.stringify({
+          messages: history.map((m) => ({
+            role: m.role,
+            text: historyText(m),
+          })),
+        }),
       });
       const data: unknown = await res.json().catch(() => null);
-      const obj = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+      const obj =
+        data && typeof data === "object"
+          ? (data as Record<string, unknown>)
+          : {};
       if (!res.ok) {
-        throw new Error(typeof obj.error === "string" ? obj.error : "Алдаа гарлаа. Дахин оролдоно уу.");
+        throw new Error(
+          typeof obj.error === "string"
+            ? obj.error
+            : "Алдаа гарлаа. Дахин оролдоно уу.",
+        );
       }
-      const changes = Array.isArray(obj.changes) ? (obj.changes as Change[]) : [];
+      const changes = Array.isArray(obj.changes)
+        ? (obj.changes as Change[])
+        : [];
       setMessages((prev) => [
         ...prev,
         {
           id: nextId.current++,
           role: "assistant",
-          text: typeof obj.reply === "string" && obj.reply ? obj.reply : "Ойлголоо.",
+          text:
+            typeof obj.reply === "string" && obj.reply
+              ? obj.reply
+              : "Ойлголоо.",
           changes,
         },
       ]);
@@ -97,7 +117,10 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
         {
           id: nextId.current++,
           role: "assistant",
-          text: err instanceof Error ? err.message : "Алдаа гарлаа. Дахин оролдоно уу.",
+          text:
+            err instanceof Error
+              ? err.message
+              : "Алдаа гарлаа. Дахин оролдоно уу.",
           error: true,
         },
       ]);
@@ -107,13 +130,22 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
     }
   }
 
-  function patchChange(messageId: number, index: number, patch: Partial<Change>) {
+  function patchChange(
+    messageId: number,
+    index: number,
+    patch: Partial<Change>,
+  ) {
     setMessages((prev) =>
       prev.map((m) =>
         m.id === messageId && m.changes
-          ? { ...m, changes: m.changes.map((c, i) => (i === index ? { ...c, ...patch } : c)) }
-          : m
-      )
+          ? {
+              ...m,
+              changes: m.changes.map((c, i) =>
+                i === index ? { ...c, ...patch } : c,
+              ),
+            }
+          : m,
+      ),
     );
   }
 
@@ -122,10 +154,16 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
     const supabase = createClient();
     const { error } =
       change.type === "create"
-        ? await supabase.from("assistant_knowledge").delete().eq("id", change.id)
+        ? await supabase
+            .from("assistant_knowledge")
+            .delete()
+            .eq("id", change.id)
         : await supabase
             .from("assistant_knowledge")
-            .update({ title: change.previous!.title, content: change.previous!.content })
+            .update({
+              title: change.previous!.title,
+              content: change.previous!.content,
+            })
             .eq("id", change.id);
     if (error) {
       toast.error("Буцааж чадсангүй");
@@ -152,7 +190,9 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
         </span>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="text-[15px] font-semibold">Nandia-д заах</p>
-          <p className="text-[12px] opacity-90">Хэлсэн зүйлийг чинь цэгцлээд шууд мэдлэгтээ нэмнэ</p>
+          <p className="text-[12px] opacity-90">
+            Хэлсэн зүйлийг чинь цэгцлээд шууд мэдлэгтээ нэмнэ
+          </p>
         </div>
         <button
           type="button"
@@ -165,16 +205,21 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
         </button>
       </header>
 
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+      <div
+        ref={scrollRef}
+        className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
+      >
         {messages.length === 0 ? (
           <div className="pt-4 text-center text-sm text-neutral-600">
             <span className="nandia-bob mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-accent-200">
               <NandiaAvatar size={64} />
             </span>
-            <p className="mt-3 text-[15px] font-medium text-foreground">Надад юм заагаарай 🥔</p>
+            <p className="mt-3 text-[15px] font-medium text-foreground">
+              Надад юм заагаарай 🥔
+            </p>
             <p className="mt-1.5">
-              Төхөөрөмжийн мэдээлэл, шинэ журам, засвараа над руу ердийн чат шиг бич. Латинаар ч болно. Би цэгцлээд
-              шууд мэдлэгтээ нэмнэ.
+              Төхөөрөмжийн мэдээлэл, шинэ журам, засвараа над руу ердийн чат шиг
+              бич. Латинаар ч болно. Би цэгцлээд шууд мэдлэгтээ нэмнэ.
             </p>
             <button
               type="button"
@@ -201,7 +246,9 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
                   <p
                     className={cn(
                       "whitespace-pre-wrap rounded-2xl rounded-tl-sm border px-3.5 py-2 text-[14px]",
-                      m.error ? "border-accent-300 bg-accent-100 text-accent-800" : "border-border bg-background"
+                      m.error
+                        ? "border-accent-300 bg-accent-100 text-accent-800"
+                        : "border-border bg-background",
                     )}
                   >
                     {m.text}
@@ -211,14 +258,20 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
                       key={i}
                       className={cn(
                         "flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-[12.5px]",
-                        c.undone ? "bg-neutral-200 text-neutral-500 line-through" : "bg-accent-2-100 text-accent-2-800"
+                        c.undone
+                          ? "bg-neutral-200 text-neutral-500 line-through"
+                          : "bg-accent-2-100 text-accent-2-800",
                       )}
                       title={c.summary}
                     >
                       <span className="min-w-0 flex-1">
                         {c.type === "create" ? "✅ Нэмсэн: " : "✏️ Зассан: "}
                         <b>{c.title}</b>
-                        {c.summary && <span className="block text-[11.5px] opacity-80">{c.summary}</span>}
+                        {c.summary && (
+                          <span className="block text-[11.5px] opacity-80">
+                            {c.summary}
+                          </span>
+                        )}
                       </span>
                       {!c.undone && (
                         <button
@@ -234,7 +287,7 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
                   ))}
                 </div>
               </div>
-            )
+            ),
           )
         )}
         {busy && (
@@ -268,7 +321,11 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
                 e.preventDefault();
                 void send(input);
               }
@@ -288,7 +345,9 @@ export default function KnowledgeTeachChat({ onChanged }: { onChanged: () => voi
             <SendHorizontal size={16} />
           </button>
         </div>
-        <p className="mt-1.5 px-1 text-[11px] text-neutral-500">Enter — илгээх · Shift+Enter — шинэ мөр</p>
+        <p className="mt-1.5 px-1 text-[11px] text-neutral-500">
+          Enter — илгээх · Shift+Enter — шинэ мөр
+        </p>
       </form>
     </section>
   );

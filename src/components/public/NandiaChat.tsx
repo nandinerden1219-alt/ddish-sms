@@ -1,6 +1,12 @@
 "use client";
 
-import { Copy, MessageSquarePlus, RotateCcw, SendHorizontal, X } from "lucide-react";
+import {
+  Copy,
+  MessageSquarePlus,
+  RotateCcw,
+  SendHorizontal,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/lib/clipboard";
@@ -10,7 +16,7 @@ import AnswerText, { findMentionedItems } from "./AnswerText";
 import NandiaAvatar from "./NandiaAvatar";
 
 const EXAMPLES = [
-  "Награ, хүч 70 чанар 20, цас орсон",
+  "Награ, дохио 0 чанар 0, цас орсон",
   "4K төхөөрөмж reset яаж хийх вэ?",
   "Дохио хэвийн ч зураг гарахгүй байна",
 ];
@@ -85,14 +91,18 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
   }, [messages, open]);
 
   function updateMessage(id: number, patch: Partial<Message>) {
-    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+    );
   }
 
   /** Asks again after a failed answer: drops that question and its failed reply, then resends it. */
   function retry(answerId: number) {
     if (busy) return;
     const answerIndex = messages.findIndex((m) => m.id === answerId);
-    const questionIndex = messages.slice(0, answerIndex).findLastIndex((m) => m.role === "user");
+    const questionIndex = messages
+      .slice(0, answerIndex)
+      .findLastIndex((m) => m.role === "user");
     if (questionIndex < 0) return;
     void send(messages[questionIndex].text, messages.slice(0, questionIndex));
   }
@@ -105,7 +115,10 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
     // Failed answers are not part of the conversation the model sees.
     const history = [...base.filter((m) => m.status !== "error"), userMessage];
     const answerId = nextId.current++;
-    setMessages([...history, { id: answerId, role: "assistant", text: "", status: "streaming" }]);
+    setMessages([
+      ...history,
+      { id: answerId, role: "assistant", text: "", status: "streaming" },
+    ]);
     setInput("");
     setBusy(true);
 
@@ -116,15 +129,20 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history.map(({ role, text: t }) => ({ role, text: t })) }),
+        body: JSON.stringify({
+          messages: history.map(({ role, text: t }) => ({ role, text: t })),
+        }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
         const data: unknown = await res.json().catch(() => null);
         throw new Error(
-          data && typeof data === "object" && "error" in data && typeof data.error === "string"
+          data &&
+            typeof data === "object" &&
+            "error" in data &&
+            typeof data.error === "string"
             ? data.error
-            : "Алдаа гарлаа. Дахин оролдоно уу."
+            : "Алдаа гарлаа. Дахин оролдоно уу.",
         );
       }
 
@@ -166,7 +184,8 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
   }
 
   async function copyAnswer(text: string) {
-    if (await copyToClipboard(text.replace(/\*/g, ""))) toast.success("Хариултыг хууллаа");
+    if (await copyToClipboard(text.replace(/\*/g, "")))
+      toast.success("Хариултыг хууллаа");
     else toast.error("Хуулж чадсангүй — гараар сонгож хуулна уу");
   }
 
@@ -191,7 +210,8 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
             <div className="min-w-0 flex-1 leading-tight">
               <p className="font-heading text-[17px]">Nandia AI</p>
               <p className="flex items-center gap-1.5 text-[12px] opacity-90">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent-2-300" /> ДДэш-ийн туслах · онлайн
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-2-300" />{" "}
+                ДДэш-ийн туслах · онлайн
               </p>
             </div>
             <button
@@ -214,14 +234,22 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
             </button>
           </header>
 
-          <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4" aria-live="polite">
+          <div
+            ref={scrollRef}
+            className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
+            aria-live="polite"
+          >
             {messages.length === 0 ? (
               <div className="pt-3 text-center">
                 <span className="nandia-bob mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-accent-200">
                   <NandiaAvatar size={80} />
                 </span>
-                <p className="mt-3 text-[15px] font-medium">Сайн уу! Би Nandia AI 👋</p>
-                <p className="mt-1 text-sm text-neutral-600">Төхөөрөмж, дохио, антен, сунгалт — асуу. Латинаар ч болно.</p>
+                <p className="mt-3 text-[15px] font-medium">
+                  Сайн уу! Би Nandia AI 👋
+                </p>
+                <p className="mt-1 text-sm text-neutral-600">
+                  Төхөөрөмж, дохио, антен, сунгалт — асуу. Латинаар ч болно.
+                </p>
                 <div className="mt-4 flex flex-col items-center gap-2">
                   {EXAMPLES.map((example) => (
                     <button
@@ -251,7 +279,7 @@ export default function NandiaChat({ items }: { items: InformationItem[] }) {
                     onCopy={copyAnswer}
                     onRetry={() => retry(m.id)}
                   />
-                )
+                ),
               )
             )}
           </div>
@@ -338,7 +366,8 @@ function AssistantMessage({
   onCopy: (text: string) => void;
   onRetry: () => void;
 }) {
-  const suggested = message.status === "done" ? findMentionedItems(items, message.text) : [];
+  const suggested =
+    message.status === "done" ? findMentionedItems(items, message.text) : [];
 
   return (
     <div className="flex items-start gap-2">
@@ -386,7 +415,9 @@ function AssistantMessage({
                 key={item.id}
                 className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5"
               >
-                <span className="min-w-0 flex-1 truncate text-[13px]">SMS: {item.title}</span>
+                <span className="min-w-0 flex-1 truncate text-[13px]">
+                  SMS: {item.title}
+                </span>
                 <button
                   type="button"
                   onClick={() => void copyInformation(item, "main")}
