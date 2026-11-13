@@ -2,6 +2,7 @@ import type { Content } from "@google/genai";
 import { errorResponse, streamGemini } from "@/lib/ai/gemini";
 import { getSmsTemplates } from "@/lib/ai/smsTemplates";
 import { buildSystemPrompt, knowledgeHint, type KnowledgeSection } from "@/lib/assistant/prompt";
+import { selectContext } from "@/lib/assistant/retrieval";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -72,12 +73,13 @@ export async function POST(request: Request) {
   }));
 
   const [knowledge, templates] = await Promise.all([getKnowledge(), getSmsTemplates()]);
+  const userTexts = recent.filter((m) => m.role === "user").map((m) => m.text);
 
-  const hint = knowledgeHint(
-    knowledge,
-    recent.filter((m) => m.role === "user").map((m) => m.text)
-  );
+  // Pick the sections and CKB pieces this question needs (before the hint is appended).
+  const context = await selectContext(knowledge, contents, userTexts);
+
+  const hint = knowledgeHint(knowledge, userTexts);
   if (hint) contents.at(-1)!.parts!.push({ text: hint });
 
-  return streamGemini(buildSystemPrompt(knowledge, templates), contents);
+  return streamGemini(buildSystemPrompt(knowledge, context.sections, templates, context.docs), contents);
 }

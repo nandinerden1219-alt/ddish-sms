@@ -25,16 +25,23 @@ function isOverloaded(err: unknown): boolean {
   return err instanceof ApiError && err.status === 503;
 }
 
+/** Free-tier limits are per model, so the fallback usually still has room. */
+function isRateLimited(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 429;
+}
+
 /**
- * Runs a Gemini call on the main model; if it is overloaded (503), tries once
- * more on the fallback model, which is usually not busy at the same time.
+ * Runs a Gemini call on the main model; if it is overloaded (503) or its
+ * free-tier limit is used up (429), tries once more on the fallback model.
  */
 async function withRetry<T>(call: (model: string) => Promise<T>): Promise<T> {
   try {
     return await call(GEMINI_MODEL);
   } catch (err) {
-    if (!isOverloaded(err)) throw err;
-    console.warn(`${GEMINI_MODEL} overloaded — retrying on ${GEMINI_FALLBACK_MODEL}`);
+    if (!isOverloaded(err) && !isRateLimited(err)) throw err;
+    console.warn(
+      `${GEMINI_MODEL} ${isRateLimited(err) ? "rate-limited" : "overloaded"} — retrying on ${GEMINI_FALLBACK_MODEL}`
+    );
     return call(GEMINI_FALLBACK_MODEL);
   }
 }
@@ -71,7 +78,10 @@ function failureResponse(err: unknown): Response {
 export async function generateGeminiJson<T>(
   systemInstruction: string,
   contents: ContentListUnion,
-  schema: object
+  schema: object,
+  // MEDIUM suits careful admin work (merging knowledge); quick per-question
+  // steps such as picking relevant articles pass MINIMAL.
+  options: { thinkingLevel?: ThinkingLevel; maxOutputTokens?: number } = {}
 ): Promise<{ data: T } | { error: Response }> {
   const ai = getClient();
   if (ai instanceof Response) return { error: ai };
@@ -86,9 +96,8 @@ export async function generateGeminiJson<T>(
           systemInstruction,
           responseMimeType: "application/json",
           responseJsonSchema: schema,
-          // Merging knowledge needs more care than chat replies; admin-only, low volume.
-          thinkingConfig: { thinkingLevel: ThinkingLevel.MEDIUM },
-          maxOutputTokens: 8192,
+          thinkingConfig: { thinkingLevel: options.thinkingLevel ?? ThinkingLevel.MEDIUM },
+          maxOutputTokens: options.maxOutputTokens ?? 8192,
         },
       })
     );

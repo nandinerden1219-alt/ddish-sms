@@ -147,9 +147,15 @@ function InactiveBadge() {
 export function KnowledgeDocView({
   sections,
   onEdit,
+  showToc = true,
+  searchPlaceholder = "Мэдлэгээс хайх… (жишээ нь reset, 976, Konka)",
 }: {
   sections: AssistantKnowledge[];
-  onEdit: (section: AssistantKnowledge) => void;
+  /** Omit for read-only content (e.g. the CKB import). */
+  onEdit?: (section: AssistantKnowledge) => void;
+  /** The chip list gets unwieldy for large sets; search is enough there. */
+  showToc?: boolean;
+  searchPlaceholder?: string;
 }) {
   const [query, setQuery] = useState("");
   const parsed = useParsed(sections);
@@ -166,11 +172,12 @@ export function KnowledgeDocView({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Мэдлэгээс хайх… (жишээ нь reset, 976, Konka)"
+            placeholder={searchPlaceholder}
             style={{ outline: "none" }}
             className="min-w-0 flex-1 bg-transparent text-sm"
           />
         </label>
+        {showToc && (
         <nav className="flex flex-wrap gap-1.5" aria-label="Агуулга">
           {parsed.map(({ section }) => (
             <button
@@ -188,6 +195,12 @@ export function KnowledgeDocView({
             </button>
           ))}
         </nav>
+        )}
+        {!showToc && (
+          <p className="px-1 text-[12.5px] text-neutral-500">
+            {q ? `${shown.length} / ${parsed.length} олдлоо` : `Нийт ${parsed.length} нийтлэл`}
+          </p>
+        )}
       </div>
 
       {shown.length === 0 && (
@@ -211,15 +224,17 @@ export function KnowledgeDocView({
             </span>
             <h2 className="min-w-0 flex-1 text-[16px] font-semibold">{section.title}</h2>
             {!section.is_active && <InactiveBadge />}
-            <button
-              type="button"
-              onClick={() => onEdit(section)}
-              className="shrink-0 rounded-full p-1.5 text-neutral-500 hover:bg-neutral-200 hover:text-foreground"
-              aria-label="Засах"
-              title="Засах"
-            >
-              <Pencil size={15} />
-            </button>
+            {onEdit && (
+              <button
+                type="button"
+                onClick={() => onEdit(section)}
+                className="shrink-0 rounded-full p-1.5 text-neutral-500 hover:bg-neutral-200 hover:text-foreground"
+                aria-label="Засах"
+                title="Засах"
+              >
+                <Pencil size={15} />
+              </button>
+            )}
           </header>
           <div className="space-y-4 px-4 py-4 text-[14px] leading-relaxed">
             {groups.map((group, i) => (

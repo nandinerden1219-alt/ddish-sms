@@ -1,11 +1,11 @@
 "use client";
 
-import { ArrowDown, ArrowUp, BookOpen, FileText, Network, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, FileText, Library, Network, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import type { AssistantKnowledge } from "@/types";
+import type { AssistantKnowledge, CkbDoc } from "@/types";
 import ConfirmDialog from "./ConfirmDialog";
 import KnowledgeForm from "./KnowledgeForm";
 import KnowledgeTeachChat from "./KnowledgeTeachChat";
@@ -14,20 +14,46 @@ import { KnowledgeDocView, KnowledgeSchemaView } from "./KnowledgeViews";
 /** Above this, every question carries a lot of text: slower answers, free-tier limits. */
 const LARGE_KNOWLEDGE_CHARS = 150_000;
 
-type View = "doc" | "schema" | "manage";
+type View = "doc" | "schema" | "manage" | "ckb";
 
 const VIEWS: { id: View; label: string; icon: typeof FileText }[] = [
   { id: "doc", label: "Текст", icon: FileText },
   { id: "schema", label: "Схем", icon: Network },
   { id: "manage", label: "Засах", icon: Pencil },
+  { id: "ckb", label: "CKB", icon: Library },
 ];
 
 interface KnowledgeManagerProps {
   initialSections: AssistantKnowledge[];
   missingTable: boolean;
+  /** Imported DDish CKB pieces (read-only here); [] when not imported. */
+  ckbDocs: CkbDoc[];
 }
 
-export default function KnowledgeManager({ initialSections, missingTable }: KnowledgeManagerProps) {
+/** One read-only card per CKB article, its parts (devices/sub-topics) as headings. */
+function ckbToArticles(docs: CkbDoc[]): AssistantKnowledge[] {
+  const byArticle = new Map<string, CkbDoc[]>();
+  for (const d of docs) {
+    if (!byArticle.has(d.short_id)) byArticle.set(d.short_id, []);
+    byArticle.get(d.short_id)!.push(d);
+  }
+  return [...byArticle.values()].map((pieces, i) => {
+    const first = pieces[0];
+    const body = pieces.map((d) => (d.part ? `${d.part}:\n${d.content}` : d.content)).join("\n\n");
+    return {
+      id: `ckb-${first.short_id}`,
+      title: first.article_title,
+      content: `Ангилал: ${first.category}\n\n${body}${first.url ? `\n\nCKB: ${first.url}` : ""}`,
+      display_order: i,
+      is_active: true,
+      created_at: "",
+      updated_at: "",
+    };
+  });
+}
+
+export default function KnowledgeManager({ initialSections, missingTable, ckbDocs }: KnowledgeManagerProps) {
+  const ckbArticles = useMemo(() => ckbToArticles(ckbDocs), [ckbDocs]);
   const [sections, setSections] = useState(initialSections);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AssistantKnowledge | null>(null);
@@ -152,7 +178,19 @@ export default function KnowledgeManager({ initialSections, missingTable }: Know
           ))}
         </div>
 
-        {sorted.length === 0 ? (
+        {view === "ckb" ? (
+          ckbArticles.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-16 text-center text-sm text-muted">
+              CKB-ийн мэдээлэл хараахан импортлогдоогүй байна.
+            </div>
+          ) : (
+            <KnowledgeDocView
+              sections={ckbArticles}
+              showToc={false}
+              searchPlaceholder="CKB-ээс хайх… (жишээ нь урамшуулал, сунгалт, Награ)"
+            />
+          )
+        ) : sorted.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-16 text-center text-sm text-muted">
             Одоогоор мэдлэг алга. Төхөөрөмж бүрээр (Награ, 4K, 3.0…) эсвэл сэдвээр (дохио, антен, reset…) нэг нэг хэсэг
             болгон нэмнэ үү.

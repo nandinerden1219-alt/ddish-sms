@@ -55,6 +55,17 @@ export interface AssistantKnowledge {
   updated_at: string;
 }
 
+/** One retrievable piece of the DDish CKB (table ckb_docs): an article, or one part of it. */
+export interface CkbDoc {
+  chunk_key: string;
+  short_id: string;
+  category: string;
+  article_title: string;
+  part: string;
+  content: string;
+  url: string | null;
+}
+
 export interface AssistantKnowledgeFormValues {
   title: string;
   content: string;

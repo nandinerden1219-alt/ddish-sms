@@ -16,7 +16,28 @@ export default function AnswerText({ text }: { text: string }) {
   );
 }
 
+const URL_PATTERN = /(https?:\/\/[^\s)<>"]+)/g;
+
+/** Links (e.g. CKB instructions with pictures) open in a new tab; the rest gets bold/italic. */
 function renderInline(line: string) {
+  return line.split(URL_PATTERN).map((part, i) =>
+    i % 2 === 1 ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-all font-medium text-accent-700 underline underline-offset-2 hover:text-accent-900"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{renderEmphasis(part)}</span>
+    )
+  );
+}
+
+function renderEmphasis(line: string) {
   return line.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g).map((part, i) => {
     if (part.length > 4 && part.startsWith("**") && part.endsWith("**")) {
       return <strong key={i}>{part.slice(2, -2)}</strong>;
