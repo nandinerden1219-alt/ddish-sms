@@ -135,6 +135,12 @@ export async function selectContext(
   const device = findMentionedDevice(knowledge, userTexts);
   if (device) chosen.add(device);
 
+  // Questions from the diagnosis form already name the device and carry a
+  // verdict; extra CKB text only distracted the fast model (it then claimed
+  // the device had no knowledge), so they skip the router.
+  const fromDiagnosisForm = userTexts.at(-1)?.startsWith("Оношилгоо:") ?? false;
+  if (fromDiagnosisForm) return { sections: knowledge.filter((s) => chosen.has(s)), docs: [] };
+
   const routable = knowledge.filter((s) => !chosen.has(s));
   const docs = await getCkbDocs();
   const items = buildItems(routable, docs);
