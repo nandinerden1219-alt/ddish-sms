@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, BookOpen, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, FileText, Network, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -9,9 +9,18 @@ import type { AssistantKnowledge } from "@/types";
 import ConfirmDialog from "./ConfirmDialog";
 import KnowledgeForm from "./KnowledgeForm";
 import KnowledgeTeachChat from "./KnowledgeTeachChat";
+import { KnowledgeDocView, KnowledgeSchemaView } from "./KnowledgeViews";
 
 /** Above this, every question carries a lot of text: slower answers, free-tier limits. */
 const LARGE_KNOWLEDGE_CHARS = 150_000;
+
+type View = "doc" | "schema" | "manage";
+
+const VIEWS: { id: View; label: string; icon: typeof FileText }[] = [
+  { id: "doc", label: "Текст", icon: FileText },
+  { id: "schema", label: "Схем", icon: Network },
+  { id: "manage", label: "Засах", icon: Pencil },
+];
 
 interface KnowledgeManagerProps {
   initialSections: AssistantKnowledge[];
@@ -23,6 +32,7 @@ export default function KnowledgeManager({ initialSections, missingTable }: Know
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AssistantKnowledge | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AssistantKnowledge | null>(null);
+  const [view, setView] = useState<View>("doc");
 
   const sorted = useMemo(() => [...sections].sort((a, b) => a.display_order - b.display_order), [sections]);
   const activeChars = useMemo(
@@ -124,11 +134,39 @@ export default function KnowledgeManager({ initialSections, missingTable }: Know
           </p>
         )}
 
+        <div className="mb-4 inline-flex rounded-full border border-neutral-300 bg-surface p-1" role="tablist">
+          {VIEWS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={view === id}
+              onClick={() => setView(id)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                view === id ? "bg-accent text-background" : "text-neutral-600 hover:bg-neutral-200"
+              )}
+            >
+              <Icon size={15} /> {label}
+            </button>
+          ))}
+        </div>
+
         {sorted.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-16 text-center text-sm text-muted">
             Одоогоор мэдлэг алга. Төхөөрөмж бүрээр (Награ, 4K, 3.0…) эсвэл сэдвээр (дохио, антен, reset…) нэг нэг хэсэг
             болгон нэмнэ үү.
           </div>
+        ) : view === "doc" ? (
+          <KnowledgeDocView
+            sections={sorted}
+            onEdit={(section) => {
+              setEditing(section);
+              setFormOpen(true);
+            }}
+          />
+        ) : view === "schema" ? (
+          <KnowledgeSchemaView sections={sorted} />
         ) : (
           <ul className="space-y-2">
             {sorted.map((section, i) => (

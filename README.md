@@ -136,9 +136,10 @@ npm run dev
 1. Репозиторыг GitHub-т push хийнэ.
 2. [vercel.com](https://vercel.com) дээр импортолно.
 3. Project Settings → Environment Variables хэсэгт `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`-г нэмнэ.
-4. Deploy.
+4. AI боломжуудад (Оношилгоо, Nandia AI, Nandia-д заах) `GEMINI_API_KEY`-г нэмнэ ([aistudio.google.com/apikey](https://aistudio.google.com/apikey), төлбөрийн тохиргоо холбоогүй төслийн түлхүүр бол үнэгүй). `NEXT_PUBLIC_` угтвар бүү тавь — түлхүүр зөвхөн серверт байна.
+5. Deploy. Орчны хувьсагч нэмсэн/сольсон бол **Redeploy** хийнэ — хуучин deploy шинэ утгыг авахгүй.
 
-Ямар ч хост дээр deploy хийж болно (Netlify, self-hosted Node сервер гэх мэт) — зөвхөн дээрх хоёр орчны хувьсагчийг тохируулах шаардлагатай.
+Ямар ч хост дээр deploy хийж болно (Netlify, self-hosted Node сервер гэх мэт) — зөвхөн дээрх орчны хувьсагчдыг тохируулах шаардлагатай.
 
 ## Төслийн бүтэц
 

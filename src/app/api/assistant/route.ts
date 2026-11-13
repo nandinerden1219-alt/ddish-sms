@@ -1,7 +1,7 @@
 import type { Content } from "@google/genai";
 import { errorResponse, streamGemini } from "@/lib/ai/gemini";
 import { getSmsTemplates } from "@/lib/ai/smsTemplates";
-import { buildSystemPrompt, deviceHint, type KnowledgeSection } from "@/lib/assistant/prompt";
+import { buildSystemPrompt, knowledgeHint, type KnowledgeSection } from "@/lib/assistant/prompt";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
   const [knowledge, templates] = await Promise.all([getKnowledge(), getSmsTemplates()]);
 
-  const hint = deviceHint(
+  const hint = knowledgeHint(
     knowledge,
     recent.filter((m) => m.role === "user").map((m) => m.text)
   );
