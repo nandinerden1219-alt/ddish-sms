@@ -64,6 +64,8 @@ export interface CkbDoc {
   part: string;
   content: string;
   url: string | null;
+  /** When the article was last updated in the CKB (ISO); prices/promotions may be stale. */
+  source_updated_at: string | null;
 }
 
 export interface AssistantKnowledgeFormValues {

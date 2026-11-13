@@ -40,10 +40,11 @@ function ckbToArticles(docs: CkbDoc[]): AssistantKnowledge[] {
   return [...byArticle.values()].map((pieces, i) => {
     const first = pieces[0];
     const body = pieces.map((d) => (d.part ? `${d.part}:\n${d.content}` : d.content)).join("\n\n");
+    const updated = first.source_updated_at ? ` · CKB-д шинэчилсэн: ${first.source_updated_at.slice(0, 10)}` : "";
     return {
       id: `ckb-${first.short_id}`,
       title: first.article_title,
-      content: `Ангилал: ${first.category}\n\n${body}${first.url ? `\n\nCKB: ${first.url}` : ""}`,
+      content: `Ангилал: ${first.category}${updated}\n\n${body}${first.url ? `\n\nCKB: ${first.url}` : ""}`,
       display_order: i,
       is_active: true,
       created_at: "",

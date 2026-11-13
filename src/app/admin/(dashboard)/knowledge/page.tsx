@@ -9,7 +9,7 @@ export default async function AdminKnowledgePage() {
     supabase.from("assistant_knowledge").select("*").order("display_order"),
     supabase
       .from("ckb_docs")
-      .select("chunk_key, short_id, category, article_title, part, content, url")
+      .select("chunk_key, short_id, category, article_title, part, content, url, source_updated_at")
       .order("category")
       .order("article_title")
       .order("chunk_key")

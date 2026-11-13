@@ -28,7 +28,7 @@ async function getCkbDocs(): Promise<CkbDoc[]> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("ckb_docs")
-      .select("chunk_key, short_id, category, article_title, part, content, url")
+      .select("chunk_key, short_id, category, article_title, part, content, url, source_updated_at")
       .order("category")
       .order("article_title")
       .order("chunk_key")
@@ -46,6 +46,11 @@ interface RoutingItem {
   label: string;
   section?: KnowledgeSection;
   docs: CkbDoc[];
+}
+
+/** " (2026-07-08)" — lets the router prefer the newest of several articles on one topic. */
+function dated(d: CkbDoc): string {
+  return d.source_updated_at ? ` (${d.source_updated_at.slice(0, 10)})` : "";
 }
 
 function buildItems(sections: KnowledgeSection[], docs: CkbDoc[]): RoutingItem[] {
@@ -69,14 +74,14 @@ function buildItems(sections: KnowledgeSection[], docs: CkbDoc[]): RoutingItem[]
       const parts = [...new Set(pieces.map((d) => d.part).filter(Boolean))].slice(0, 8);
       items.push({
         id: `d${++n}`,
-        label: `${first.category} › ${first.article_title}${parts.length ? ` [${parts.join(", ")}]` : ""}`,
+        label: `${first.category} › ${first.article_title}${parts.length ? ` [${parts.join(", ")}]` : ""}${dated(first)}`,
         docs: pieces,
       });
     } else {
       for (const d of pieces) {
         items.push({
           id: `d${++n}`,
-          label: `${d.category} › ${d.article_title}${d.part ? ` › ${d.part}` : ""}`,
+          label: `${d.category} › ${d.article_title}${d.part ? ` › ${d.part}` : ""}${dated(d)}`,
           docs: [d],
         });
       }
@@ -101,6 +106,7 @@ function routerPrompt(items: RoutingItem[]): string {
   return `Чи ДДэш ТВ-ийн дотоод мэдлэгийн сангаас хайлт хийдэг туслах. Ажилтны СҮҮЛИЙН асуултад хариулахад хэрэгтэй зүйлсийг доорх жагсаалтаас сонго.
 - Ажилтнууд латин үсгээр, товчилж бичдэг: nagra = Награ, arion = Арион, intek = Интек, konka = Конка, sungalt = сунгалт, bagts = багц, uramshuulal = урамшуулал, kino = кино, gomdol = гомдол, kart = карт, salbar = салбар г.м.
 - Хамгийн хамааралтай 1–${MAX_PICKS} зүйлийн id-г ач холбогдлын дарааллаар өг. Төхөөрөмж дурдсан бол тухайн төхөөрөмжийн хэсгийг сонго.
+- Хаалтанд CKB-д шинэчлэгдсэн огноо байна. Үнэ, урамшуулал, нөхцөлийн асуултад ижил сэдвийн хэд хэдэн зүйл байвал хамгийн сүүлд шинэчлэгдсэнийг заавал оруул.
 - Ярианы өмнөх мессежийг харгалзаж, "тэр", "үүнийг" гэх мэт үгийг ойлго.
 - Мэндчилгээ, хамааралгүй яриа, эсвэл тохирох зүйл байхгүй бол хоосон жагсаалт өг.
 
