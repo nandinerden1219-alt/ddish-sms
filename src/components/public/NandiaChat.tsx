@@ -16,7 +16,7 @@ import AnswerText, { findMentionedItems } from "./AnswerText";
 import NandiaAvatar from "./NandiaAvatar";
 
 const EXAMPLES = [
-  "Награ, дохио 0 чанар 0, цас орсон",
+  "Награ, дохио 0 чанар 0",
   "4K төхөөрөмж reset яаж хийх вэ?",
   "Дохио хэвийн ч зураг гарахгүй байна",
 ];
