@@ -104,7 +104,7 @@ export const DEVICE_RULES: DeviceRule[] = [
     aliases: ["intek", "интек"],
     strengthLabel: "Дохио",
     qualityLabel: "Чанар",
-    hint: "Дохио: 1–90 (ихэвчлэн 70–80) · Чанар: тааралгүй үед 2, таарахаараа шууд 70–90",
+    hint: "Дохио: 1–90 (ихэвчлэн 70–80) · Чанар: 2–90 (тааралгүй 2, таарвал 70–90)",
     // Quality jumps straight from 2 to about 70, so 3–69 never shows.
     check: (s, q) =>
       outOf(s, 1, 90) || (q !== null && q !== 2 && outOf(q, 70, 90))
