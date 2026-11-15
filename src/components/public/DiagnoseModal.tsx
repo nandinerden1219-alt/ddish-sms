@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "@/components/admin/Modal";
 import { copyInformation } from "@/lib/copyItem";
 import { cn } from "@/lib/utils";
+import { DEVICE_RULES, IMPOSSIBLE_READING_REPLY, type DeviceRule, type Reading } from "@/lib/signalRules";
 import type { InformationItem } from "@/types";
 import AnswerText, { findMentionedItems } from "./AnswerText";
 
@@ -12,104 +13,9 @@ const inputClass =
   "w-full rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent-200";
 const labelClass = "mb-1.5 block text-sm font-medium text-neutral-700";
 
-type Reading = number | null;
-
-interface Device {
-  id: string;
-  /** Name as it appears in Nandia's knowledge titles, so the right section is used. */
-  name: string;
-  strengthLabel: string;
-  qualityLabel: string;
-  /** Values this device can show (mirrors the "Дохио, чанарын боломжит утга" knowledge section). */
-  hint?: string;
-  /** A short warning when the entered numbers are impossible for this device. */
-  check?: (strength: Reading, quality: Reading) => string | null;
-  /**
-   * What the readings mean, from the staff's own rules. Decided in code because
-   * the fast model contradicted itself on these; Nandia then explains the steps.
-   */
-  verdict?: (strength: Reading, quality: Reading) => string | null;
-}
-
-const outOf = (v: Reading, min: number, max: number) => v !== null && (v < min || v > max);
-
-const THREE_O_VERDICT = (s: Reading) =>
-  s === 4 ? "Дохио 4: онцгой тохиолдол, холболтын заавар өгнө." : null;
-
-const THREE_O_CHECK = (s: Reading, q: Reading) =>
-  (s !== null && s < 18 && s !== 4) || (q !== null && q < 10)
-    ? "3.0, 4K-ийн дохио хамгийн багадаа 18 (онцгой үед 4), чанар хамгийн багадаа 10 байдаг."
-    : null;
-
-const DEVICES: Device[] = [
-  {
-    id: "konka",
-    name: "Konka",
-    strengthLabel: "I (дохионы хүч)",
-    qualityLabel: "Q (дохионы чанар)",
-    hint: "I: 11–99 · Q: 0–60 (I, Q зөвхөн Konka дээр гардаг)",
-    check: (s, q) => (outOf(s, 11, 99) || outOf(q, 0, 60) ? "Konka-гийн I 11–99, Q 0–60 хооронд л заадаг." : null),
-    verdict: (s, q) => {
-      if (s === null) return null;
-      if (s < 80) return "I 80-аас доош: кабель утас, дуран (LNB), оролтуудаа шалгана.";
-      if (q === null) return null;
-      if (q < 45) return "I хэвийн, Q 45-аас бага: антен тааралгүй байна, антенаа тааруулна.";
-      return "I, Q хэвийн: дохио таарсан байна.";
-    },
-  },
-  {
-    id: "nagra",
-    name: "Награ",
-    strengthLabel: "Дохио",
-    qualityLabel: "Чанар",
-    hint: "Дохио: 0–100 · Чанар: 6, 7 эсвэл 100 (гацсан үед 0, 0)",
-    check: (s, q) =>
-      outOf(s, 0, 100) || (q !== null && ![0, 6, 7, 100].includes(q))
-        ? "Награ-гийн чанар зөвхөн 6, 7 эсвэл 100 (гацсан үед 0) байдаг."
-        : null,
-    verdict: (s, q) => {
-      if (s === 0 && q === 0) return "0, 0: төхөөрөмж гацсан байна, reset хийнэ.";
-      if (q === 6 || q === 7) return `Чанар ${q}: антен тааралгүй байна, антенаа тааруулна.`;
-      if (q === 100) return "Чанар 100: антен таарсан, дохио хэвийн байна.";
-      return null;
-    },
-  },
-  {
-    id: "arion",
-    name: "Арион",
-    strengthLabel: "Дохио",
-    qualityLabel: "Чанар",
-    hint: "Тааралгүй үед 0, 0 · Таарвал дохио 90, чанар 50-аас дээш",
-    check: (s, q) =>
-      s === null || q === null || (s === 0 && q === 0) || q >= 50
-        ? null
-        : "Арион тааралгүй үед 0, 0, таарвал чанар 50-аас дээш л заадаг.",
-    verdict: (s, q) => {
-      if (s === 0 && q === 0) return "0, 0: антен тааралгүй байна, антенаа тааруулна.";
-      if (q !== null && q >= 50) return "Чанар 50-аас дээш: антен таарсан, дохио хэвийн байна.";
-      return null;
-    },
-  },
-  { id: "intek", name: "Интек", strengthLabel: "Дохио", qualityLabel: "Чанар" },
-  {
-    id: "d30",
-    name: "3.0",
-    strengthLabel: "Дохио",
-    qualityLabel: "Чанар",
-    hint: "Энгийн үед дохио ≥ 18, чанар ≥ 10 · онцгой үед дохио 4",
-    check: THREE_O_CHECK,
-    verdict: THREE_O_VERDICT,
-  },
-  {
-    id: "d4k",
-    name: "4K",
-    strengthLabel: "Дохио",
-    qualityLabel: "Чанар",
-    hint: "Энгийн үед дохио ≥ 18, чанар ≥ 10 · онцгой үед дохио 4",
-    check: THREE_O_CHECK,
-    verdict: THREE_O_VERDICT,
-  },
-];
+// Device rules are shared with the Nandia chat route (src/lib/signalRules.ts).
+const DEVICES = DEVICE_RULES;
+type Device = DeviceRule;
 
 function toReading(value: string): Reading {
   if (value.trim() === "") return null;
@@ -124,11 +30,13 @@ function buildQuestion(device: Device, strength: Reading, quality: Reading, note
     strength !== null ? `${short(device.strengthLabel)} = ${strength}` : null,
     quality !== null ? `${short(device.qualityLabel)} = ${quality}` : null,
   ].filter(Boolean);
-  // Impossible readings get no verdict; Nandia then asks to double-check the device.
-  const verdict = device.check?.(strength, quality) ? null : device.verdict?.(strength, quality);
+  // Impossible readings get no verdict; Nandia is told so and asks to double-check the device.
+  const warning = device.check?.(strength, quality) ?? null;
+  const verdict = warning ? null : device.verdict?.(strength, quality);
   return [
     `Оношилгоо: ${device.name} төхөөрөмж.`,
     readings.length ? `${readings.join(", ")}.` : "",
+    warning ? `Код шалгасан: ${warning} ${IMPOSSIBLE_READING_REPLY}` : "",
     verdict ? `Мэдлэгийн дагуу дүгнэлт: ${verdict} Энэ дүгнэлтэд тулгуурлаж хэрэглэгчид хэлэх алхмыг бич.` : "",
     note.trim() ? `Нэмэлт: ${note.trim()}` : "",
   ]

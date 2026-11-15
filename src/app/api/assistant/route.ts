@@ -3,6 +3,7 @@ import { errorResponse, streamGemini } from "@/lib/ai/gemini";
 import { getSmsTemplates } from "@/lib/ai/smsTemplates";
 import { buildSystemPrompt, knowledgeHint, type KnowledgeSection } from "@/lib/assistant/prompt";
 import { selectContext } from "@/lib/assistant/retrieval";
+import { signalNote } from "@/lib/signalRules";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -80,6 +81,13 @@ export async function POST(request: Request) {
 
   const hint = knowledgeHint(knowledge, userTexts);
   if (hint) contents.at(-1)!.parts!.push({ text: hint });
+
+  // Readings typed in chat ("nagra 0.0", "konka I 85 Q 20") get the same coded
+  // verdict as the diagnosis form, whose questions already carry one.
+  if (!userTexts.at(-1)?.startsWith("Оношилгоо:")) {
+    const note = signalNote(userTexts);
+    if (note) contents.at(-1)!.parts!.push({ text: note });
+  }
 
   return streamGemini(buildSystemPrompt(knowledge, context.sections, templates, context.docs), contents);
 }
