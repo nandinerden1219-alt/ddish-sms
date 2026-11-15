@@ -5,7 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "@/components/admin/Modal";
 import { copyInformation } from "@/lib/copyItem";
 import { cn } from "@/lib/utils";
-import { DEVICE_RULES, IMPOSSIBLE_READING_REPLY, type DeviceRule, type Reading } from "@/lib/signalRules";
+import {
+  DEVICE_RULES,
+  IMPOSSIBLE_READING_REPLY,
+  VERDICT_INSTRUCTION,
+  type DeviceRule,
+  type Reading,
+} from "@/lib/signalRules";
 import type { InformationItem } from "@/types";
 import AnswerText, { findMentionedItems } from "./AnswerText";
 
@@ -37,7 +43,7 @@ function buildQuestion(device: Device, strength: Reading, quality: Reading, note
     `Оношилгоо: ${device.name} төхөөрөмж.`,
     readings.length ? `${readings.join(", ")}.` : "",
     warning ? `Код шалгасан: ${warning} ${IMPOSSIBLE_READING_REPLY}` : "",
-    verdict ? `Мэдлэгийн дагуу дүгнэлт: ${verdict} Энэ дүгнэлтэд тулгуурлаж хэрэглэгчид хэлэх алхмыг бич.` : "",
+    verdict ? `Мэдлэгийн дагуу дүгнэлт: ${verdict} ${VERDICT_INSTRUCTION}` : "",
     note.trim() ? `Нэмэлт: ${note.trim()}` : "",
   ]
     .filter(Boolean)

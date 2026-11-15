@@ -27,6 +27,9 @@ export interface DeviceRule {
   verdict?: (strength: Reading, quality: Reading) => string | null;
 }
 
+/** Follows a coded verdict; without it the model sometimes mixed in its own guess. */
+export const VERDICT_INSTRUCTION = "Энэ дүгнэлтийг үнэн гэж хүлээн авч, зөвхөн түүнд тохирох алхмыг бич. Өөр дүгнэлт бүү гарга.";
+
 /** What Nandia does when the readings can't come from the named device. */
 export const IMPOSSIBLE_READING_REPLY =
   'Оношлохгүй: "Энэ төхөөрөмж ийм тоо заадаггүй. Төхөөрөмжийн загвар болон харж буй цонхоо сайн баталгаажуулна уу" гэж хэлж, боломжит утгыг сануул.';
@@ -101,8 +104,19 @@ export const DEVICE_RULES: DeviceRule[] = [
     aliases: ["intek", "интек"],
     strengthLabel: "Дохио",
     qualityLabel: "Чанар",
-    hint: "Чанар хамгийн багадаа 2",
-    check: (_s, q) => (q !== null && q < 2 ? "Интекийн чанар хамгийн багадаа 2 байдаг." : null),
+    hint: "Дохио: 1–90 (ихэвчлэн 70–80) · Чанар: тааралгүй үед 2, таарахаараа шууд 70–90",
+    // Quality jumps straight from 2 to about 70, so 3–69 never shows.
+    check: (s, q) =>
+      outOf(s, 1, 90) || (q !== null && q !== 2 && outOf(q, 70, 90))
+        ? "Интекийн дохио 1–90, чанар 2 эсвэл 70–90 хооронд л заадаг."
+        : null,
+    verdict: (s, q) => {
+      if (s === null) return null;
+      if (s < 70) return "Дохио 70-аас доош: холболт хэвийн биш байна, кабель утас, дуран (LNB), оролтуудаа шалгана.";
+      if (q === null) return null;
+      if (q === 2) return "Дохио хэвийн, чанар 2: антен тааралгүй байна, антенаа тааруулна.";
+      return "Дохио, чанар хэвийн: антен таарсан байна.";
+    },
   },
   {
     id: "d30",
@@ -220,5 +234,5 @@ export function signalNote(userTexts: string[]): string | null {
   }
   const verdict = rule.verdict?.(strength, quality);
   if (!verdict) return null;
-  return `[Тэмдэглэл (код шалгасан): ${readings}. Мэдлэгийн дагуу дүгнэлт: ${verdict} Энэ дүгнэлтийг үнэн гэж хүлээн авч, зөвхөн түүнд тохирох алхмыг бич. Өөр дүгнэлт бүү гарга.]`;
+  return `[Тэмдэглэл (код шалгасан): ${readings}. Мэдлэгийн дагуу дүгнэлт: ${verdict} ${VERDICT_INSTRUCTION}]`;
 }
